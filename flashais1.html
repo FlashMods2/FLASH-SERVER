@@ -207,9 +207,9 @@
             const categorizeNumber = (number) => (number >= 0 && number <= 4) ? "Small" : "Big";
 
             const trendAnalysisPrediction = (data) => {
-                if (data.length < 3) return "No Data";
+                if (data.length < 2) return "No Data";
 
-                const recentData = data.slice(0, 3); // Analyze last 3 periods
+                const recentData = data.slice(0, 2); // Analyze last 3 periods
                 let bigCount = recentData.filter(item => item.number > 4).length;
                 let smallCount = recentData.filter(item => item.number <= 4).length;
 
