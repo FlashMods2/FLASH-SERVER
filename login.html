@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 FLASH AI S1 🔥</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQffM652v27YDAnfq1KggkPMlJd_ZGCQ0",
+            authDomain: "flash-ai-s1.firebaseapp.com",
+            projectId: "flash-ai-s1",
+            storageBucket: "flash-ai-s1.appspot.com",
+            messagingSenderId: "461153919599",
+            appId: "1:461153919599:web:5db1f03555129a84f6239a",
+            measurementId: "G-HPM72Y2LWH"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Function to show custom loading alert
+        window.showLoadingAlert = function () {
+            let loadingAlert = document.createElement("div");
+            loadingAlert.id = "loadingAlert";
+            loadingAlert.innerHTML = `
+                <div class="custom-loading">
+                    <div class="loader"></div>
+                </div>
+            `;
+            document.body.appendChild(loadingAlert);
+        };
+
+        // Function to close custom loading alert
+        window.closeLoadingAlert = function () {
+            let loadingAlert = document.getElementById("loadingAlert");
+            if (loadingAlert) {
+                document.body.removeChild(loadingAlert);
+            }
+        };
+
+        // Function to show custom alert
+        window.showCustomAlert = function (message, isWelcome = false) {
+            let alertBox = document.createElement("div");
+            alertBox.id = "customAlert";
+            alertBox.innerHTML = `
+                <div class="custom-alert ${isWelcome ? 'welcome-alert' : ''}">
+                    <h3>FLASH AI S1</h3>
+                    <p>${message}</p>
+                    <button onclick="closeCustomAlert()">OK</button>
+                </div>
+            `;
+            document.body.appendChild(alertBox);
+        };
+
+        // Function to close custom alert
+        window.closeCustomAlert = function () {
+            let alertBox = document.getElementById("customAlert");
+            if (alertBox) {
+                document.body.removeChild(alertBox);
+            }
+        };
+
+        // Function to save key to local storage (shared preferences)
+        function saveKeyToLocalStorage(key) {
+            localStorage.setItem("flashAiS1Key", key);
+        }
+
+        // Function to get key from local storage (shared preferences)
+        function getKeyFromLocalStorage() {
+            return localStorage.getItem("flashAiS1Key");
+        }
+
+        // Function to clear key from local storage (shared preferences)
+        function clearKeyFromLocalStorage() {
+            localStorage.removeItem("flashAiS1Key");
+        }
+
+        // On page load, check if a key is saved in local storage
+        window.onload = function () {
+            let savedKey = getKeyFromLocalStorage();
+            if (savedKey) {
+                document.getElementById("key").value = savedKey;
+            }
+        };
+
+        // Login function
+        window.login = function () {
+            let key = document.getElementById("key").value;
+            if (!key) {
+                showCustomAlert("❌ Please enter a key!");
+                return;
+            }
+
+            // Show loading alert
+            showLoadingAlert();
+
+            get(ref(db, "FLASH AI S1/User/" + key)).then(snapshot => {
+                if (!snapshot.exists()) {
+                    closeLoadingAlert();
+                    showCustomAlert("❌ Key Not Found In Server!");
+                    return;
+                }
+
+                let keyData = snapshot.val();
+
+                // Check AmIUser
+                if (keyData.AmIUser !== "Yes") {
+                    closeLoadingAlert();
+                    showCustomAlert("❌ Invalid User!");
+                    return;
+                }
+
+                // Check Expiry
+                if (keyData.expiry !== "Permanent" && new Date() > new Date(keyData.expiry)) {
+                    closeLoadingAlert();
+                    showCustomAlert("❌ Key Expired!");
+                    return;
+                }
+
+                // Check Status
+                if (keyData.status !== "Active") {
+                    closeLoadingAlert();
+                    showCustomAlert("❌ Key Is Deactivated!");
+                    return;
+                }
+
+                // Save the key to local storage (shared preferences)
+                saveKeyToLocalStorage(key);
+
+                // All checks passed, proceed to login
+                update(ref(db, "FLASH AI S1/User/" + key), {
+                    used: true
+                }).then(() => {
+                    closeLoadingAlert();
+                    // Show welcome message in custom alert
+                    showCustomAlert("🔥 Welcome To The FLASH AI S1 🔥", true);
+                    // Redirect to /FLASHAIS1.html on the same domain after 2 seconds
+                    setTimeout(() => {
+                        window.location.pathname = "/FLASHAIS1.html";
+                    }, 2000);
+                }).catch(error => {
+                    closeLoadingAlert();
+                    console.error("Error: ", error);
+                    showCustomAlert("❌ An Error Occurred. Please Try Again!");
+                });
+
+            }).catch(error => {
+                closeLoadingAlert();
+                console.error("Error: ", error);
+                showCustomAlert("❌ An Error Occurred. Please Try Again!");
+            });
+        };
+
+        // Free Service Alert
+        window.showFreeServiceAlert = function () {
+            let message = `
+                The free service will be available in the next update.  
+                <br><br>
+                🔹 Reason: Currently, we are working on improving server security for free service  
+                and optimizing performance to handle a large number of users.  
+                <br><br>
+                🔹 We are also testing some new features to ensure  
+                a smooth and reliable experience for everyone.  
+                <br><br>
+                🔹 Once everything is ready, the free service will be launched  
+                with better security and faster response times. 
+            `;
+            showCustomAlert(message);
+        };
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: url('https://i.ibb.co/rKvVbgsL/68630448-0344-4c82-864a-35a01c6bb5db.jpg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .login-box {
+            font-size: 15px;
+            width: 300px;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255, 140, 0, 0.8);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h2 {
+            color: cyan;
+            text-shadow: 0 0 10px cyan;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        input {
+            background: rgba(255, 255, 255, 0.2);
+            color: cyan;
+            text-align: center;
+            outline: none;
+            font-weight: bold;
+        }
+
+        button {
+            background: linear-gradient(45deg, #ff4500, #ff0000);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 0 10px rgba(255, 140, 0, 0.8);
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #ff0000, #ff4500);
+            box-shadow: 0 0 15px rgba(255, 140, 0, 0.9);
+        }
+
+        .free-service {
+            color: white;
+            font-size: 14px;
+            margin-top: 10px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .custom-loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 140, 0, 0.9);
+        }
+
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid cyan;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .custom-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 140, 0, 0.9);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .custom-alert.welcome-alert {
+            background: rgba(0, 0, 0, 0.9);
+            box-shadow: 0 0 20px rgba(255, 140, 0, 1);
+        }
+
+        .custom-alert h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: cyan;
+        }
+
+        .custom-alert button {
+            margin-top: 15px;
+            padding: 8px 15px;
+            border: none;
+            background: cyan;
+            color: black;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .custom-alert button:hover {
+            background: blue;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h2>🔥 FLASH AI S1 🔥</h2>
+        <input type="text" id="key" placeholder="Enter Secret Key">
+        <button onclick="login()">Login</button>
+        <p class="free-service" onclick="showFreeServiceAlert()">Click Here For FLASH S1 Free Service</p>
+    </div>
+</body>
+</html>
