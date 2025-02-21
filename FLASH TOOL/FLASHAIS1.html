@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 FLASH AI S1 🚀</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: url('https://i.ibb.co/rKvVbgsL/68630448-0344-4c82-864a-35a01c6bb5db.jpg') no-repeat center center;
+            background-size: cover;
+            font-family: 'Poppins', sans-serif;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container { 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            width: 90%;
+            max-width: 500px;
+            padding: 20px;
+        }
+        .box {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            font-size: 14px;
+            border-radius: 15px;
+            text-align: center;
+            width: 100%;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        h1 { 
+            font-size: 24px; 
+            margin-bottom: 20px; 
+            font-weight: bold; 
+            text-shadow: 0 0 12px cyan; 
+        }
+        h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: cyan;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        th {
+            background: rgba(0, 0, 0, 0.5);
+            color: cyan;
+        }
+        .logout-btn, .tutorial-btn, .stats-btn {
+            background: linear-gradient(45deg, #ff4500, #ff0000);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 0 10px rgba(255, 140, 0, 0.8);
+            transition: 0.3s;
+            width: 100%;
+        }
+        .logout-btn:hover, .tutorial-btn:hover, .stats-btn:hover {
+            background: linear-gradient(45deg, #ff0000, #ff4500);
+            box-shadow: 0 0 15px rgba(255, 140, 0, 0.9);
+        }
+        .custom-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            text-align: center;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 140, 0, 0.9);
+            z-index: 1000;
+        }
+        .custom-alert h3 {
+            color: cyan;
+            margin-bottom: 10px;
+        }
+        .custom-alert button {
+            background: cyan;
+            color: black;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .custom-alert button:hover {
+            background: blue;
+            color: white;
+        }
+        .stats-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .stats-item span {
+            color: cyan;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Period -->
+        <div class="box current-period">
+            <h2 id="currentPeriod">📅 Period: Loading...</h2>
+        </div>
+
+        <!-- Prediction -->
+        <div class="box prediction">
+            <h2 id="predictedNumber">🔮 Prediction: Loading...</h2>
+            <p id="predictionAnalysis"></p>
+        </div>
+
+        <!-- Table -->
+        <div class="box">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Period</th>
+                        <th>Big/Small</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Buttons -->
+        <button class="tutorial-btn" onclick="showTutorial()">📚 Tutorial</button>
+        <button class="stats-btn" onclick="showGameStats()">📊 Game Statistics</button>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tableBody = document.querySelector('#dataTable tbody');
+            const predictedNumberElement = document.getElementById('predictedNumber');
+            const currentPeriodElement = document.getElementById('currentPeriod');
+            const predictionAnalysisElement = document.getElementById('predictionAnalysis');
+
+            let gameData = [];
+            let trendHistory = [];
+            let gameStats = {
+                totalGames: 0,
+                totalWins: 0,
+                totalLosses: 0,
+                winPercentage: 0,
+                currentStreak: 0
+            };
+
+            const fetchData = async (url, body) => {
+                try {
+                    let response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+                        body: JSON.stringify(body)
+                    });
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                    return null;
+                }
+            };
+
+            const getGameData = async () => {
+                let data = await fetchData('https://api.bdg88zf.com/api/webapi/GetNoaverageEmerdList', {
+                    pageSize: 10, pageNo: 1, typeId: 1, language: 0,
+                    random: "ded40537a2ce416e96c00e5218f6859a",
+                    signature: "69306982EEEB19FA940D72EC93C62552",
+                    timestamp: Math.floor(Date.now() / 1000)
+                });
+
+                if (data && data.data && data.data.list) {
+                    return data.data.list.map(item => ({ issue: item.issueNumber, number: Number(item.number) }));
+                }
+                return [];
+            };
+
+            const categorizeNumber = (number) => (number >= 0 && number <= 4) ? "Small" : "Big";
+
+            const trendAnalysisPrediction = (data) => {
+                if (data.length < 3) return "No Data";
+
+                const recentData = data.slice(0, 3); // Analyze last 3 periods
+                let bigCount = recentData.filter(item => item.number > 4).length;
+                let smallCount = recentData.filter(item => item.number <= 4).length;
+
+                // AI-based prediction
+                if (bigCount > smallCount) {
+                    return "Big";
+                } else {
+                    return "Small";
+                }
+            };
+
+            const updateGameStats = (prediction, actualResult) => {
+                gameStats.totalGames++;
+                if (prediction === actualResult) {
+                    gameStats.totalWins++;
+                    gameStats.currentStreak++;
+                } else {
+                    gameStats.totalLosses++;
+                    gameStats.currentStreak = 0;
+                }
+                gameStats.winPercentage = ((gameStats.totalWins / gameStats.totalGames) * 100).toFixed(2);
+            };
+
+            const updateDataAndPrediction = async () => {
+                gameData = await getGameData();
+                if (gameData.length > 0) {
+                    tableBody.innerHTML = '';
+                    gameData.forEach((item) => {
+                        tableBody.innerHTML += `
+                            <tr>
+                                <td>${item.issue}</td>
+                                <td>${categorizeNumber(item.number)}</td>
+                            </tr>`;
+                    });
+
+                    let prediction = trendAnalysisPrediction(gameData);
+                    predictedNumberElement.textContent = `🔮 Prediction: ${prediction}`;
+
+                    let currentIssueNumber = gameData[0].issue;
+                    let nextPeriod = (BigInt(currentIssueNumber) + 1n).toString();
+                    currentPeriodElement.textContent = `📅 Period: ${nextPeriod}`;
+
+                    // Save trend history
+                    trendHistory.push({ period: currentIssueNumber, prediction });
+
+                    // Update game stats after 5 seconds
+                    setTimeout(() => {
+                        let actualResult = categorizeNumber(gameData[0].number);
+                        updateGameStats(prediction, actualResult);
+                    }, 5000); // 5 seconds delay
+                }
+            };
+
+            function startReverseTimer() {
+                function updateTimer() {
+                    let now = new Date();
+                    if (now.getSeconds() === 0) updateDataAndPrediction();
+                }
+
+                setInterval(updateTimer, 1000);
+                updateTimer();
+            }
+
+            // Logout Function
+            window.logout = function () {
+                localStorage.removeItem("flashAiS1Key");
+                window.location.pathname = "/login.html"; // Redirect to /login.html on the same domain
+            };
+
+            // Tutorial Function
+            window.showTutorial = function () {
+                let message = `
+                    <h3>📚 Tutorial</h3>
+                    <p>
+                        🔹 <strong>How It Works:</strong> The AI analyzes the trend of the last 5 periods to predict the next outcome.<br>
+                        🔹 <strong>When to Play:</strong> Play when the trend is stable (e.g., 3-4 consecutive Big/Small).<br>
+                        🔹 <strong>When Not to Play:</strong> Avoid playing when the trend is unpredictable (e.g., alternating Big/Small).<br>
+                        🔹 <strong>Time:</strong> Play during peak hours for better results.<br>
+                        🔹 <strong>Note:</strong> Always gamble responsibly.
+                    </p>
+                `;
+                let alertBox = document.createElement("div");
+                alertBox.id = "customAlert";
+                alertBox.innerHTML = `
+                    <div class="custom-alert">
+                        ${message}
+                        <button onclick="closeCustomAlert()">OK</button>
+                    </div>
+                `;
+                document.body.appendChild(alertBox);
+            };
+
+            // Game Statistics Function
+            window.showGameStats = function () {
+                let message = `
+                    <h3>📊 Game Statistics</h3>
+                    <div class="stats-item">
+                        <span>Total Games Played:</span>
+                        <span>${gameStats.totalGames}</span>
+                    </div>
+                    <div class="stats-item">
+                        <span>Total Wins:</span>
+                        <span>${gameStats.totalWins}</span>
+                    </div>
+                    <div class="stats-item">
+                        <span>Total Losses:</span>
+                        <span>${gameStats.totalLosses}</span>
+                    </div>
+                    <div class="stats-item">
+                        <span>Win Percentage:</span>
+                        <span>${gameStats.winPercentage}%</span>
+                    </div>
+                    <div class="stats-item">
+                        <span>Current Streak:</span>
+                        <span>${gameStats.currentStreak}</span>
+                    </div>
+                `;
+                let alertBox = document.createElement("div");
+                alertBox.id = "customAlert";
+                alertBox.innerHTML = `
+                    <div class="custom-alert">
+                        ${message}
+                        <button onclick="closeCustomAlert()">OK</button>
+                    </div>
+                `;
+                document.body.appendChild(alertBox);
+            };
+
+            // Close Custom Alert
+            window.closeCustomAlert = function () {
+                let alertBox = document.getElementById("customAlert");
+                if (alertBox) {
+                    document.body.removeChild(alertBox);
+                }
+            };
+
+            updateDataAndPrediction();
+            startReverseTimer();
+        });
+    </script>
+</body>
+</html>
