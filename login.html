@@ -78,19 +78,69 @@
             localStorage.removeItem("flashAiS1Key");
         }
 
-        // On page load, check if a key is saved in local storage
+        // Function to save checkbox state to local storage
+        function saveCheckboxState(state) {
+            localStorage.setItem("flashAiS1Agreement", state);
+        }
+
+        // Function to get checkbox state from local storage
+        function getCheckboxState() {
+            return localStorage.getItem("flashAiS1Agreement") === "true";
+        }
+
+        // On page load, check if a key and checkbox state are saved in local storage
         window.onload = function () {
             let savedKey = getKeyFromLocalStorage();
             if (savedKey) {
                 document.getElementById("key").value = savedKey;
             }
+
+            let savedCheckboxState = getCheckboxState();
+            if (savedCheckboxState) {
+                document.getElementById("agreementCheckbox").checked = true;
+            }
+        };
+
+        // Show agreement details in custom alert
+        window.showAgreement = function () {
+            let agreementMessage = `
+                <h3>🔥 FLASH AI S1 Agreement 🔥</h3>
+                <p>
+                    This is an AI server and API-based prediction web application.  
+                    It provides analysis and predictions based on advanced algorithms.  
+                    By using this service, you agree to the following terms:  
+                    <br><br>
+                    1. This web app uses AI to analyze and predict outcomes.  
+                    2. The predictions are based on historical data and trends.  
+                    3. The service is provided "as is" without any guarantees.  
+                    4. You agree to use this service responsibly.  
+                    <br><br>
+                    Click "Accept" to proceed.
+                </p>
+                <button onclick="acceptAgreement()">Accept</button>
+            `;
+            showCustomAlert(agreementMessage);
+        };
+
+        // Accept agreement and auto-tick the checkbox
+        window.acceptAgreement = function () {
+            document.getElementById("agreementCheckbox").checked = true;
+            saveCheckboxState(true);
+            closeCustomAlert();
         };
 
         // Login function
         window.login = function () {
             let key = document.getElementById("key").value;
+            let agreementChecked = document.getElementById("agreementCheckbox").checked;
+
             if (!key) {
                 showCustomAlert("❌ Please enter a key!");
+                return;
+            }
+
+            if (!agreementChecked) {
+                showCustomAlert("❌ Please accept the agreement to proceed!");
                 return;
             }
 
@@ -238,6 +288,24 @@
             box-shadow: 0 0 15px rgba(255, 140, 0, 0.9);
         }
 
+        .agreement {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            color: white;
+            font-size: 14px;
+        }
+
+        .agreement input {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .agreement label {
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
         .free-service {
             color: white;
             font-size: 14px;
@@ -319,6 +387,10 @@
     <div class="login-box">
         <h2>🔥 FLASH AI S1 🔥</h2>
         <input type="text" id="key" placeholder="Enter Secret Key">
+        <div class="agreement">
+            <input type="checkbox" id="agreementCheckbox">
+            <label onclick="showAgreement()">I agree to the terms and conditions</label>
+        </div>
         <button onclick="login()">Login</button>
         <p class="free-service" onclick="showFreeServiceAlert()">Click Here For FLASH S1 Free Service</p>
     </div>
