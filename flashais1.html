@@ -124,6 +124,33 @@
         .stats-item span {
             color: cyan;
         }
+        .win-loss-track {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .track-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .track-item:last-child {
+            border-bottom: none;
+        }
+        .win {
+            color: limegreen;
+            font-weight: bold;
+        }
+        .loss {
+            color: red;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -206,14 +233,14 @@
 
             const categorizeNumber = (number) => (number >= 0 && number <= 4) ? "Small" : "Big";
 
-            const trendAnalysisPrediction = (data) => {
+            const countBasedPrediction = (data) => {
                 if (data.length < 2) return "No Data";
 
                 const recentData = data.slice(0, 2); // Analyze last 3 periods
                 let bigCount = recentData.filter(item => item.number > 4).length;
                 let smallCount = recentData.filter(item => item.number <= 4).length;
 
-                // AI-based prediction
+                // Count-based prediction
                 if (bigCount > smallCount) {
                     return "Big";
                 } else {
@@ -231,6 +258,13 @@
                     gameStats.currentStreak = 0;
                 }
                 gameStats.winPercentage = ((gameStats.totalWins / gameStats.totalGames) * 100).toFixed(2);
+
+                // Save trend history
+                trendHistory.push({
+                    period: gameData[0].issue,
+                    prediction: prediction,
+                    actualResult: actualResult
+                });
             };
 
             const updateDataAndPrediction = async () => {
@@ -245,15 +279,12 @@
                             </tr>`;
                     });
 
-                    let prediction = trendAnalysisPrediction(gameData);
+                    let prediction = countBasedPrediction(gameData);
                     predictedNumberElement.textContent = `🔮 Prediction: ${prediction}`;
 
                     let currentIssueNumber = gameData[0].issue;
                     let nextPeriod = (BigInt(currentIssueNumber) + 1n).toString();
                     currentPeriodElement.textContent = `📅 Period: ${nextPeriod}`;
-
-                    // Save trend history
-                    trendHistory.push({ period: currentIssueNumber, prediction });
 
                     // Update game stats after 5 seconds
                     setTimeout(() => {
@@ -284,10 +315,10 @@
                 let message = `
                     <h3>📚 Tutorial</h3>
                     <p>
-                        🔹 <strong>How It Works:</strong> The AI analyzes the trend of the last 5 periods to predict the next outcome.<br>
-                        🔹 <strong>When to Play:</strong> Play when the trend is stable (e.g., 3-4 consecutive Big/Small).<br>
-                        🔹 <strong>When Not to Play:</strong> Avoid playing when the trend is unpredictable (e.g., alternating Big/Small).<br>
-                        🔹 <strong>Time:</strong> Play during peak hours for better results.<br>
+                        🔹 <strong>How It Works:</strong> The AI analyzes the trend of the last 5 periods to predict the next outcome.<br><br>
+                        🔹 <strong>When to Play:</strong> Play when the trend is stable (e.g., 3-4 consecutive Big/Small).<br><br>
+                        🔹 <strong>When Not to Play:</strong> Avoid playing when the trend is unpredictable (e.g., alternating Big/Small).<br><br>
+                        🔹 <strong>Time:</strong> Play during peak hours for better results.<br><br>
                         🔹 <strong>Note:</strong> Always gamble responsibly.
                     </p>
                 `;
@@ -325,6 +356,17 @@
                     <div class="stats-item">
                         <span>Current Streak:</span>
                         <span>${gameStats.currentStreak}</span>
+                    </div>
+                    <h3>📝 Win/Loss Track</h3>
+                    <div class="win-loss-track">
+                        ${trendHistory.map((item, index) => `
+                            <div class="track-item">
+                                <span>Period ${item.period}:</span>
+                                <span class="${item.prediction === item.actualResult ? 'win' : 'loss'}">
+                                    ${item.prediction === item.actualResult ? 'Win' : 'Loss'}
+                                </span>
+                            </div>
+                        `).join('')}
                     </div>
                 `;
                 let alertBox = document.createElement("div");
